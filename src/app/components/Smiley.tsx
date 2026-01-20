@@ -13,9 +13,9 @@ interface SmileyProps {
 export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueAnimationTrigger }: SmileyProps) {
   const tongueControls = useAnimation();
   const idleBreathing = {
-  scaleY: [1, 1.04, 1],
+  scaleY: [1, 1.08, 1],
   transition: {
-    duration: 2,
+    duration: 1.5,
     ease: easeInOut,
     repeat: Infinity,
   },
