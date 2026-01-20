@@ -183,7 +183,7 @@ function App() {
           <div className="w-13 h-13" />
 
           <div className="text-center flex-1">
-            <h1 className="text-5xl font-black text-white drop-shadow-lg tracking-tight">GKB</h1>
+            <h1 className="text-4xl font-black text-white drop-shadow-lg tracking-tight">GKB</h1>
             <p className="text-xl text-white/80 font-medium mt-1">Grand Kuni Bank</p>
           </div>
 
@@ -193,7 +193,7 @@ function App() {
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
             onClick={() => setShowMenu(!showMenu)}
-            className="relative z-50 w-13 h-13 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/35 transition-colors"
+            className="relative z-50 w-15 h-15 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/35 transition-colors"
           >
             <motion.div
               animate={showMenu ? "open" : "closed"}
@@ -203,11 +203,7 @@ function App() {
               }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
-              {showMenu ? (
-                <X className="w-7 h-7 text-white" />
-              ) : (
-                <Menu className="w-7 h-7 text-white" />
-              )}
+                <Menu className="w-9 h-9 text-white" />
             </motion.div>
           </motion.button>
         </div>
