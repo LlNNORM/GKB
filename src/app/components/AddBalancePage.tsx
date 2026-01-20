@@ -15,9 +15,9 @@ const ADD_BALANCE_ITEMS: AddBalanceItem[] = [
   { id: 2, text: "Это не посуда - это зеркала", baseCost: 0.5, emoji: "✨" },
   { id: 3, text: "Загружаю барабан", baseCost: 0.5, emoji: "👕" },
   { id: 4, text: "Мистер Пропер снова звонил получить совет", baseCost: 1, emoji: "🧹" },
-  { id: 5, text: "Откровение красоты момента", baseCost: 2, emoji: "💄" },
-  { id: 6, text: "Восстанавливающие прикосновения нежных рук", baseCost: 2, emoji: "💆‍♀️" },
-  { id: 7, text: "Кормлю демонов с рук", baseCost: 2, emoji: "🍽️" },
+  { id: 5, text: "Откровение красоты момента", baseCost: 2, emoji: "📷" },
+  { id: 6, text: "Восстанавливающие прикосновения нежных рук", baseCost: 2, emoji: "💆‍♂️" },
+  { id: 7, text: "Кормлю демонов с рук", baseCost: 2, emoji: "😈" },
   { id: 8, text: "Я от тебя балдею,ты такой щедрый дядька", baseCost: 1, emoji: "😎", isVariable: true },
   { id: 9, text: "Mystery gift", baseCost: 3, emoji: "🎁" },
 ];
@@ -102,7 +102,7 @@ export function AddBalancePage({ onClose, onCancel }: AddBalancePageProps) {
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      transition={{ type: "spring", damping: 50, stiffness: 300 }}
       className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50 overflow-hidden"
     >
       <div className="h-full flex flex-col">

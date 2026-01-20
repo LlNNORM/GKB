@@ -18,7 +18,7 @@ const WISH_ITEMS: WishItem[] = [
   { id: 3, text: "Дорогой, реши проблему", baseCost: 1, emoji: "🔧", isVariable: true },
   { id: 4, text: "Курьееееер, мамочка хочет есть", baseCost: 2, emoji: "🍕" },
   { id: 5, text: "Стирка на тебе, ма бой", baseCost: 0.5, emoji: "👕" },
-  { id: 6, text: "Помни мои ножки", baseCost: 1, emoji: "💆‍♀️" },
+  { id: 6, text: "Помни мои ножки", baseCost: 1, emoji: "👣" },
   { id: 7, text: "Спинка устала, нужно помять", baseCost: 2, emoji: "💆" },
   { id: 8, text: "Стань моим шеф-поваром", baseCost: 2, emoji: "👨‍🍳" },
   { id: 9, text: "Оу май, хочу нюдсов", baseCost: 2, emoji: "📸" },
@@ -118,7 +118,7 @@ export function WishlistPage({ currentBalance, onClose, onCancel }: WishlistPage
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      transition={{ type: "spring", damping: 50, stiffness: 300 }}
       className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50 overflow-hidden"
     >
       <div className="h-full flex flex-col">

@@ -1,5 +1,5 @@
-import { motion, useAnimation } from "motion/react";
-import { useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useEffect, useState } from "react";
 import { easeInOut } from "framer-motion";
 
 interface SmileyProps {
@@ -10,66 +10,78 @@ interface SmileyProps {
   tongueAnimationTrigger: number;
 }
 
-export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueAnimationTrigger }: SmileyProps) {
+export function Smiley({
+  balance,
+  tongueRef,
+  onTongueSwipe,
+  onFaceSwipe,
+  tongueAnimationTrigger,
+}: SmileyProps) {
   const tongueControls = useAnimation();
+  const [isTongueVisible, setIsTongueVisible] = useState(false);
+
   const idleBreathing = {
-  scaleY: [1, 1.08, 1],
-  transition: {
-    duration: 1.5,
-    ease: easeInOut,
-    repeat: Infinity,
-  },
-};
+    scaleY: [1, 1.08, 1],
+    transition: {
+      duration: 1.5,
+      ease: easeInOut,
+      repeat: Infinity,
+    },
+  };
 
+  // Первое появление языка
   useEffect(() => {
-    // Initial animation
-    tongueControls.start({
-      scaleY: 1,
-      opacity: 1,
-      transition: {
-        delay: 1,
-        type: "spring",
-        stiffness: 150,
-        damping: 12,
-      },
-    }).then(() => {
-    // 👉 старт idle дыхания
-    tongueControls.start(idleBreathing);
-  });;
-
-    
+    tongueControls
+      .start({
+        scaleY: 1,
+        opacity: 1,
+        transition: {
+          delay: 1,
+          type: "spring",
+          stiffness: 150,
+          damping: 12,
+        },
+      })
+      .then(() => {
+        setIsTongueVisible(true); // ← язык появился → разрешаем показывать баланс
+        tongueControls.start(idleBreathing);
+      });
   }, [tongueControls]);
 
+  // Перезапуск анимации при tongueAnimationTrigger
   useEffect(() => {
     if (tongueAnimationTrigger > 0) {
-      // Disappear and reappear animation with updated balance
-      tongueControls.start({
-        scaleY: [1, 0],
-        opacity: [1, 0],
-        transition: {
-          duration: 0.3,
-          ease: "easeInOut",
-        },
-      }).then(() => {
-        tongueControls.start({
-          scaleY: [0, 1],
-          opacity: [0, 1],
+      setIsTongueVisible(false); // скрываем баланс перед анимацией исчезновения
+
+      tongueControls
+        .start({
+          scaleY: [1, 0],
+          opacity: [1, 0],
           transition: {
             duration: 0.3,
             ease: "easeInOut",
           },
+        })
+        .then(() => {
+          tongueControls
+            .start({
+              scaleY: [0, 1],
+              opacity: [0, 1],
+              transition: {
+                duration: 0.3,
+                ease: "easeInOut",
+              },
+            })
+            .then(() => {
+              setIsTongueVisible(true); // язык снова появился → показываем баланс
+              tongueControls.start(idleBreathing);
+            });
         });
-      })
-      .then(() => {
-        // 👉 возвращаем дыхание
-        tongueControls.start(idleBreathing);
-      });;
     }
   }, [tongueAnimationTrigger, tongueControls]);
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* Smiley face container */}
       <motion.div
         initial={{ y: "100vh" }}
         animate={{ y: 0 }}
@@ -82,7 +94,7 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
         className="relative"
       >
         {/* Face */}
-        <div 
+        <div
           className="relative w-70 h-70 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-full shadow-2xl touch-none overscroll-contain select-none"
           onTouchStart={(e) => {
             e.currentTarget.dataset.startY = String(e.touches[0].clientY);
@@ -181,20 +193,22 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
             </div>
           </motion.div>
 
-          {/* Balance display on tongue (вынесено наружу) */}
-          <motion.div
-            className="absolute -bottom-18 left-1/2 -translate-x-1/2 w-30 z-30 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
-          >
-            <div className="relative h-38 flex flex-col items-center justify-center text-center">
-              <div className="text-4xl font-black text-white drop-shadow-lg">
-                {balance}
+          {/* Balance display — появляется только после языка */}
+          {isTongueVisible && (
+            <motion.div
+              className="absolute -bottom-18 left-1/2 -translate-x-1/2 w-30 z-30 pointer-events-none"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
+            >
+              <div className="relative h-38 flex flex-col items-center justify-center text-center">
+                <div className="text-4xl font-black text-white drop-shadow-lg">
+                  {balance}
+                </div>
+                <div className="text-lg font-bold text-pink-100">KK</div>
               </div>
-              <div className="text-lg font-bold text-pink-100"> KK</div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </div>
 
         {/* Cheeks */}

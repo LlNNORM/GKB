@@ -8,12 +8,10 @@ interface RulesPageProps {
 export function RulesPage({ onClose }: RulesPageProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}           // ← y вместо x
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.35,
-        ease: "easeOut",      // ограничить максимальный delay
-      }}
+      initial={{ x: "100%" }}
+      animate={{ x: 0 }}
+      exit={{ x: "100%" }}
+      transition={{ type: "spring", damping: 50, stiffness: 300 }}
       className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50 overflow-hidden"
     >
       <div className="h-full flex flex-col">

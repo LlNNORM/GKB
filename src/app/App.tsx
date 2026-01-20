@@ -19,7 +19,7 @@ export interface Transaction {
 function App() {
   const [balance, setBalance] = useState(() => {
     const saved = localStorage.getItem("gkb_balance");
-    return saved ? Number(saved) : 1000;
+    return saved ? Number(saved) : 14;
   });
 
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
@@ -225,13 +225,13 @@ function App() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute top-[75%] left-0 right-0 text-center z-0 px-4"
+        className="absolute top-[72%] left-0 right-0 text-center z-0 px-4"
       >
         <p className="text-white/60 text-md font-medium drop-shadow-lg">
-          Предъявите киску для списания Kuni-Coins
+          ✨ Предъявите вашу киску 😼 для списания Kuni-Coins✨
         </p>
         <p className="text-white/60 text-md font-medium drop-shadow-lg mt-2">
-          Предъявите ножки для начисления Kuni-Coins
+          ✨ Предъявите ваши ножки 🐾 для начисления Kuni-Coins✨
         </p>
         {faceSwipeCount > 0 && (
           <p className="text-white/50 text-xs font-medium drop-shadow-lg mt-2">
@@ -282,7 +282,7 @@ function App() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            transition={{ type: "spring", damping: 50, stiffness: 300 }}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
           >
             <div className="h-full flex flex-col p-6">
