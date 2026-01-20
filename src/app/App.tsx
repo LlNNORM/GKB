@@ -33,6 +33,7 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [openedFromMenu, setOpenedFromMenu] = useState(false);
   const [tongueAnimationTrigger, setTongueAnimationTrigger] = useState(0);
 
   const tongueRef = useRef<HTMLDivElement>(null);
@@ -154,6 +155,22 @@ function App() {
     setShowWishlist(false);
   };
 
+  const handleHistoryClose = () => {
+    if (openedFromMenu) {
+      setShowMenu(true);
+      setOpenedFromMenu(false);
+    }
+    setShowHistory(false);
+  };
+
+  const handleRulesClose = () => {
+    if (openedFromMenu) {
+      setShowMenu(true);
+      setOpenedFromMenu(false);
+    }
+    setShowRules(false);
+  };
+
   useEffect(() => {
     return () => {
       if (faceSwipeTimerRef.current) {
@@ -227,10 +244,10 @@ function App() {
         transition={{ delay: 1.5 }}
         className="absolute top-[72%] left-0 right-0 text-center z-0 px-4"
       >
-        <p className="text-white/60 text-md font-medium drop-shadow-lg">
+        <p className="text-white/60 text-lg font-medium drop-shadow-lg">
           ✨ Предъявите вашу киску 😼 для списания Kuni-Coins✨
         </p>
-        <p className="text-white/60 text-md font-medium drop-shadow-lg mt-2">
+        <p className="text-white/60 text-lg font-medium drop-shadow-lg mt-2">
           ✨ Предъявите ваши ножки 🐾 для начисления Kuni-Coins✨
         </p>
         {faceSwipeCount > 0 && (
@@ -253,26 +270,94 @@ function App() {
       {/* Модальные окна */}
       <AnimatePresence>
         {showAddBalance && (
-          <AddBalancePage onClose={handleAddBalanceClose} onCancel={handleAddBalanceCancel} />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            drag="x"
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0, right: 1 }}
+            onDragEnd={(_, { offset, velocity }) => {
+              if (offset.x > 150 || velocity.x > 500) {
+                handleAddBalanceCancel();
+              }
+            }}
+            className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+          >
+            <AddBalancePage onClose={handleAddBalanceClose} onCancel={handleAddBalanceCancel} />
+          </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {showWishlist && (
-          <WishlistPage
-            currentBalance={balance}
-            onClose={handleWishlistClose}
-            onCancel={handleWishlistCancel}
-          />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            drag="x"
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0, right: 1 }}
+            onDragEnd={(_, { offset, velocity }) => {
+              if (offset.x > 150 || velocity.x > 500) {
+                handleWishlistCancel();
+              }
+            }}
+            className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+          >
+            <WishlistPage
+              currentBalance={balance}
+              onClose={handleWishlistClose}
+              onCancel={handleWishlistCancel}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {showHistory && <TransactionHistory transactions={transactions} onClose={() => setShowHistory(false)} />}
+        {showHistory && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            drag="x"
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0, right: 1 }}
+            onDragEnd={(_, { offset, velocity }) => {
+              if (offset.x > 150 || velocity.x > 500) {
+                handleHistoryClose();
+              }
+            }}
+            className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+          >
+            <TransactionHistory transactions={transactions} onClose={handleHistoryClose} />
+          </motion.div>
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {showRules && <RulesPage onClose={() => setShowRules(false)} />}
+        {showRules && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            drag="x"
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0, right: 1 }}
+            onDragEnd={(_, { offset, velocity }) => {
+              if (offset.x > 150 || velocity.x > 500) {
+                handleRulesClose();
+              }
+            }}
+            className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+          >
+            <RulesPage onClose={handleRulesClose} />
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Боковое меню справа */}
@@ -283,6 +368,14 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            drag="x"
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0, right: 1 }}
+            onDragEnd={(_, { offset, velocity }) => {
+              if (offset.x > 150 || velocity.x > 500) {
+                setShowMenu(false);
+              }
+            }}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
           >
             <div className="h-full flex flex-col p-6">
@@ -302,6 +395,7 @@ function App() {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
+                    setOpenedFromMenu(true);
                     setShowMenu(false);
                     setShowHistory(true);
                   }}
@@ -316,6 +410,7 @@ function App() {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
+                    setOpenedFromMenu(true);
                     setShowMenu(false);
                     setShowRules(true);
                   }}

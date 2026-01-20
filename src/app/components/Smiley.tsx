@@ -23,7 +23,7 @@ export function Smiley({
   const idleBreathing = {
     scaleY: [1, 1.08, 1],
     transition: {
-      duration: 1.5,
+      duration: 1.7,
       ease: easeInOut,
       repeat: Infinity,
     },
