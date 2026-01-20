@@ -4,7 +4,7 @@ import { AddBalancePage } from "./components/AddBalancePage";
 import { WishlistPage } from "./components/WishlistPage";
 import { TransactionHistory } from "./components/TransactionHistory";
 import { RulesPage } from "./components/RulesPage";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import confetti from "canvas-confetti";
 import { Menu, X } from "lucide-react";
 
@@ -21,12 +21,10 @@ function App() {
     const saved = localStorage.getItem("gkb_balance");
     return saved ? Number(saved) : 14;
   });
-
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
     const saved = localStorage.getItem("gkb_transactions");
     return saved ? JSON.parse(saved) : [];
   });
-
   const [faceSwipeCount, setFaceSwipeCount] = useState(0);
   const [showAddBalance, setShowAddBalance] = useState(false);
   const [showWishlist, setShowWishlist] = useState(false);
@@ -35,9 +33,18 @@ function App() {
   const [showMenu, setShowMenu] = useState(false);
   const [openedFromMenu, setOpenedFromMenu] = useState(false);
   const [tongueAnimationTrigger, setTongueAnimationTrigger] = useState(0);
-
   const tongueRef = useRef<HTMLDivElement>(null);
   const faceSwipeTimerRef = useRef<NodeJS.Timeout>();
+
+  // Drag controls для каждого модального окна
+  const addBalanceDragControls = useDragControls();
+  const wishlistDragControls = useDragControls();
+  const historyDragControls = useDragControls();
+  const rulesDragControls = useDragControls();
+  const menuDragControls = useDragControls();
+
+  // Порог от левого края для начала свайпа назад (в пикселях)
+  const edgeThreshold = 80;
 
   useEffect(() => {
     localStorage.setItem("gkb_balance", balance.toString());
@@ -113,8 +120,6 @@ function App() {
 
   const handleWishlistClose = (totalCost: number, descriptions: string[]) => {
     if (totalCost > 0) {
-      // Проверяем здесь — но теперь alert заменён на UI в WishlistPage
-      // Если каким-то образом дошло сюда с totalCost > balance — просто не проводим
       if (balance >= totalCost) {
         setBalance((prev) => prev - totalCost);
         const newTransaction: Transaction = {
@@ -156,8 +161,8 @@ function App() {
     };
   }, []);
 
-  const handleSwipeBack = (_: any, closeFn: () => void) => {
-    const { offset, velocity } = _;
+  const handleSwipeBack = (info: any, closeFn: () => void) => {
+    const { offset, velocity } = info;
     if (offset.x > 120 && velocity.x > 0.4 || offset.x > 220) {
       closeFn();
     }
@@ -252,11 +257,18 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 40, stiffness: 300 }}
-            drag="x"
-            dragConstraints={{ right: 0 }}
-            dragElastic={{ right: 0.4, left: 0.1 }}
-            onDragEnd={(_, info) => handleSwipeBack(info, handleAddBalanceCancel)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+            drag="x"
+            dragControls={addBalanceDragControls}
+            dragListener={false}
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0.1, right: 0.4 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleAddBalanceCancel)}
+            onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
+              if (e.clientX <= edgeThreshold) {
+                addBalanceDragControls.start(e);
+              }
+            }}
           >
             <AddBalancePage onClose={handleAddBalanceClose} onCancel={handleAddBalanceCancel} />
           </motion.div>
@@ -270,22 +282,24 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 40, stiffness: 300 }}
-            drag="x"
-            dragConstraints={{ right: 0 }}
-            dragElastic={{ right: 0.4, left: 0.1 }}
-            onDragEnd={(_, info) => handleSwipeBack(info, handleWishlistCancel)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50 flex flex-col"
+            drag="x"
+            dragControls={wishlistDragControls}
+            dragListener={false}
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0.1, right: 0.4 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleWishlistCancel)}
+            onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
+              if (e.clientX <= edgeThreshold) {
+                wishlistDragControls.start(e);
+              }
+            }}
           >
             <WishlistPage
               currentBalance={balance}
               onClose={handleWishlistClose}
               onCancel={handleWishlistCancel}
             />
-
-            {/* Подсказка о недостатке средств — появляется только когда totalCost > balance */}
-            {/* Это пример — в реальном проекте лучше передавать состояние из WishlistPage через callback */}
-            {/* Здесь показан вариант, если WishlistPage сам управляет totalCost */}
-            {/* Если у вас totalCost приходит из WishlistPage — можно сделать пропс lowBalance */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -297,11 +311,18 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 40, stiffness: 300 }}
-            drag="x"
-            dragConstraints={{ right: 0 }}
-            dragElastic={{ right: 0.4, left: 0.1 }}
-            onDragEnd={(_, info) => handleSwipeBack(info, handleHistoryClose)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+            drag="x"
+            dragControls={historyDragControls}
+            dragListener={false}
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0.1, right: 0.4 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleHistoryClose)}
+            onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
+              if (e.clientX <= edgeThreshold) {
+                historyDragControls.start(e);
+              }
+            }}
           >
             <TransactionHistory transactions={transactions} onClose={handleHistoryClose} />
           </motion.div>
@@ -315,11 +336,18 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 40, stiffness: 300 }}
-            drag="x"
-            dragConstraints={{ right: 0 }}
-            dragElastic={{ right: 0.4, left: 0.1 }}
-            onDragEnd={(_, info) => handleSwipeBack(info, handleRulesClose)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+            drag="x"
+            dragControls={rulesDragControls}
+            dragListener={false}
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0.1, right: 0.4 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleRulesClose)}
+            onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
+              if (e.clientX <= edgeThreshold) {
+                rulesDragControls.start(e);
+              }
+            }}
           >
             <RulesPage onClose={handleRulesClose} />
           </motion.div>
@@ -334,11 +362,18 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 40, stiffness: 300 }}
-            drag="x"
-            dragConstraints={{ right: 0 }}
-            dragElastic={{ right: 0.4, left: 0.1 }}
-            onDragEnd={(_, info) => handleSwipeBack(info, () => setShowMenu(false))}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+            drag="x"
+            dragControls={menuDragControls}
+            dragListener={false}
+            dragConstraints={{ left: 0 }}
+            dragElastic={{ left: 0.1, right: 0.4 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, () => setShowMenu(false))}
+            onPointerDown={(e: React.PointerEvent<HTMLDivElement>) => {
+              if (e.clientX <= edgeThreshold) {
+                menuDragControls.start(e);
+              }
+            }}
           >
             <div className="h-full flex flex-col p-6">
               <div className="flex items-center justify-between mb-8 pt-6">
@@ -352,7 +387,6 @@ function App() {
                   <X className="w-5 h-5 text-white" />
                 </motion.button>
               </div>
-
               <div className="space-y-4">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -368,7 +402,6 @@ function App() {
                     <span className="text-xl font-bold text-white">История транзакций</span>
                   </div>
                 </motion.button>
-
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
