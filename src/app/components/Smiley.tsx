@@ -1,5 +1,6 @@
 import { motion, useAnimation } from "motion/react";
 import { useEffect } from "react";
+import { easeInOut } from "framer-motion";
 
 interface SmileyProps {
   balance: number;
@@ -11,6 +12,14 @@ interface SmileyProps {
 
 export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueAnimationTrigger }: SmileyProps) {
   const tongueControls = useAnimation();
+  const idleBreathing = {
+  scaleY: [1, 1.04, 1],
+  transition: {
+    duration: 2,
+    ease: easeInOut,
+    repeat: Infinity,
+  },
+};
 
   useEffect(() => {
     // Initial animation
@@ -23,7 +32,12 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
         stiffness: 150,
         damping: 12,
       },
-    });
+    }).then(() => {
+    // 👉 старт idle дыхания
+    tongueControls.start(idleBreathing);
+  });;
+
+    
   }, [tongueControls]);
 
   useEffect(() => {
@@ -45,7 +59,11 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
             ease: "easeInOut",
           },
         });
-      });
+      })
+      .then(() => {
+        // 👉 возвращаем дыхание
+        tongueControls.start(idleBreathing);
+      });;
     }
   }, [tongueAnimationTrigger, tongueControls]);
 
@@ -65,7 +83,7 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
       >
         {/* Face */}
         <div 
-          className="relative w-64 h-64 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-full shadow-2xl"
+          className="relative w-70 h-70 bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-full shadow-2xl touch-none overscroll-contain select-none"
           onTouchStart={(e) => {
             e.currentTarget.dataset.startY = String(e.touches[0].clientY);
             e.currentTarget.dataset.swiped = "false";
@@ -91,13 +109,13 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
-            className="absolute top-16 left-12 w-8 h-12 bg-gray-800 rounded-full"
+            className="absolute top-16 left-14 w-11 h-14 bg-gray-800 rounded-full"
           />
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.65, type: "spring", stiffness: 200 }}
-            className="absolute top-16 right-12 w-8 h-12 bg-gray-800 rounded-full"
+            className="absolute top-16 right-14 w-11 h-14 bg-gray-800 rounded-full"
           />
 
           {/* Eye shine */}
@@ -105,13 +123,13 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="absolute top-[4.5rem] left-[3.5rem] w-2 h-3 bg-white rounded-full"
+            className="absolute top-[4.5rem] left-[4.5rem] w-4 h-5 bg-white rounded-full"
           />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="absolute top-[4.5rem] right-[3.5rem] w-2 h-3 bg-white rounded-full"
+            className="absolute top-[4.5rem] right-[4.5rem] w-4 h-5 bg-white rounded-full"
           />
 
           {/* Mouth smile */}
@@ -127,7 +145,7 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
             ref={tongueRef}
             initial={{ scaleY: 0, originY: 0 }}
             animate={tongueControls}
-            className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-28 h-36 bg-gradient-to-b from-pink-400 to-pink-500 rounded-b-full shadow-xl cursor-pointer select-none touch-none z-20"
+            className="absolute -bottom-18 left-1/2 -translate-x-1/2 w-30 h-38 bg-gradient-to-b from-pink-400 to-pink-500 rounded-b-full shadow-xl cursor-pointer select-none touch-none z-20"
             style={{
               clipPath: "ellipse(50% 60% at 50% 40%)",
               originY: 0,
@@ -155,24 +173,26 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
               e.currentTarget.dataset.swiped = "false";
             }}
           >
-            {/* Balance display on tongue */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-              className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center"
-            >
-              <div className="text-4xl font-black text-white drop-shadow-lg">
-                {balance}
-              </div>
-              <div className="text-sm font-bold text-pink-100 mt-1">KK</div>
-            </motion.div>
-
             {/* Tongue texture */}
             <div className="absolute inset-0 opacity-20">
               <div className="absolute top-1/4 left-1/3 w-2 h-1 bg-pink-600 rounded-full" />
               <div className="absolute top-1/3 right-1/3 w-2 h-1 bg-pink-600 rounded-full" />
               <div className="absolute bottom-1/3 left-1/4 w-2 h-1 bg-pink-600 rounded-full" />
+            </div>
+          </motion.div>
+
+          {/* Balance display on tongue (вынесено наружу) */}
+          <motion.div
+            className="absolute -bottom-18 left-1/2 -translate-x-1/2 w-30 z-30 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+          >
+            <div className="relative h-38 flex flex-col items-center justify-center text-center">
+              <div className="text-4xl font-black text-white drop-shadow-lg">
+                {balance}
+              </div>
+              <div className="text-lg font-bold text-pink-100"> KK</div>
             </div>
           </motion.div>
         </div>
@@ -182,13 +202,13 @@ export function Smiley({ balance, tongueRef, onTongueSwipe, onFaceSwipe, tongueA
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.6 }}
           transition={{ delay: 0.75, type: "spring" }}
-          className="absolute top-28 -left-6 w-12 h-10 bg-pink-300 rounded-full blur-sm"
+          className="absolute top-33 left-2 w-20 h-12 bg-pink-300 rounded-full blur-md"
         />
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.6 }}
           transition={{ delay: 0.75, type: "spring" }}
-          className="absolute top-28 -right-6 w-12 h-10 bg-pink-300 rounded-full blur-sm"
+          className="absolute top-33 right-2 w-20 h-12 bg-pink-300 rounded-full blur-md"
         />
       </motion.div>
     </div>
