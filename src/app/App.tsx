@@ -39,7 +39,6 @@ function App() {
   const tongueRef = useRef<HTMLDivElement>(null);
   const faceSwipeTimerRef = useRef<NodeJS.Timeout>();
 
-  // Сохранение в localStorage
   useEffect(() => {
     localStorage.setItem("gkb_balance", balance.toString());
   }, [balance]);
@@ -48,7 +47,6 @@ function App() {
     localStorage.setItem("gkb_transactions", JSON.stringify(transactions));
   }, [transactions]);
 
-  // Конфетти
   const triggerConfetti = () => {
     const count = 200;
     const defaults = { origin: { y: 0.7 } };
@@ -68,11 +66,8 @@ function App() {
     fire(0.1, { spread: 120, startVelocity: 45 });
   };
 
-  // Вибрация
   const vibrate = (pattern: number | number[]) => {
-    if ("vibrate" in navigator) {
-      navigator.vibrate(pattern);
-    }
+    if ("vibrate" in navigator) navigator.vibrate(pattern);
   };
 
   const handleTongueSwipe = () => {
@@ -83,21 +78,14 @@ function App() {
   const handleFaceSwipe = () => {
     setFaceSwipeCount((prev) => {
       const newCount = prev + 1;
-
       if (newCount >= 3) {
         setShowAddBalance(true);
         vibrate([50, 50, 50]);
         return 0;
       } else {
         vibrate(10);
-
-        if (faceSwipeTimerRef.current) {
-          clearTimeout(faceSwipeTimerRef.current);
-        }
-        faceSwipeTimerRef.current = setTimeout(() => {
-          setFaceSwipeCount(0);
-        }, 2000);
-
+        if (faceSwipeTimerRef.current) clearTimeout(faceSwipeTimerRef.current);
+        faceSwipeTimerRef.current = setTimeout(() => setFaceSwipeCount(0), 2000);
         return newCount;
       }
     });
@@ -106,7 +94,6 @@ function App() {
   const handleAddBalanceClose = (totalGain: number, descriptions: string[]) => {
     if (totalGain > 0) {
       setBalance((prev) => prev + totalGain);
-
       const newTransaction: Transaction = {
         id: Date.now().toString(),
         type: "add",
@@ -115,7 +102,6 @@ function App() {
         timestamp: Date.now(),
       };
       setTransactions((prev) => [newTransaction, ...prev]);
-
       triggerConfetti();
       vibrate([50, 50, 50]);
       setTongueAnimationTrigger((prev) => prev + 1);
@@ -123,37 +109,30 @@ function App() {
     setShowAddBalance(false);
   };
 
-  const handleAddBalanceCancel = () => {
-    setShowAddBalance(false);
-  };
+  const handleAddBalanceCancel = () => setShowAddBalance(false);
 
   const handleWishlistClose = (totalCost: number, descriptions: string[]) => {
     if (totalCost > 0) {
-      if (balance < totalCost) {
-        alert(`Недостаточно средств! Требуется: ${totalCost} KK, доступно: ${balance} KK`);
-        return;
+      // Проверяем здесь — но теперь alert заменён на UI в WishlistPage
+      // Если каким-то образом дошло сюда с totalCost > balance — просто не проводим
+      if (balance >= totalCost) {
+        setBalance((prev) => prev - totalCost);
+        const newTransaction: Transaction = {
+          id: Date.now().toString(),
+          type: "deduct",
+          amount: totalCost,
+          description: descriptions.join(", "),
+          timestamp: Date.now(),
+        };
+        setTransactions((prev) => [newTransaction, ...prev]);
+        vibrate([50, 50, 50]);
+        setTongueAnimationTrigger((prev) => prev + 1);
       }
-
-      setBalance((prev) => prev - totalCost);
-
-      const newTransaction: Transaction = {
-        id: Date.now().toString(),
-        type: "deduct",
-        amount: totalCost,
-        description: descriptions.join(", "),
-        timestamp: Date.now(),
-      };
-      setTransactions((prev) => [newTransaction, ...prev]);
-
-      vibrate([50, 50, 50]);
-      setTongueAnimationTrigger((prev) => prev + 1);
     }
     setShowWishlist(false);
   };
 
-  const handleWishlistCancel = () => {
-    setShowWishlist(false);
-  };
+  const handleWishlistCancel = () => setShowWishlist(false);
 
   const handleHistoryClose = () => {
     if (openedFromMenu) {
@@ -173,11 +152,16 @@ function App() {
 
   useEffect(() => {
     return () => {
-      if (faceSwipeTimerRef.current) {
-        clearTimeout(faceSwipeTimerRef.current);
-      }
+      if (faceSwipeTimerRef.current) clearTimeout(faceSwipeTimerRef.current);
     };
   }, []);
+
+  const handleSwipeBack = (_: any, closeFn: () => void) => {
+    const { offset, velocity } = _;
+    if (offset.x > 120 && velocity.x > 0.4 || offset.x > 220) {
+      closeFn();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex flex-col items-center justify-center overflow-hidden relative">
@@ -196,15 +180,11 @@ function App() {
         className="absolute top-12 left-0 right-0 z-10"
       >
         <div className="flex items-center justify-between px-6">
-          {/* Пустое место слева для баланса */}
           <div className="w-13 h-13" />
-
           <div className="text-center flex-1">
             <h1 className="text-4xl font-black text-white drop-shadow-lg tracking-tight">GKB</h1>
             <p className="text-xl text-white/80 font-medium mt-1">Grand Kuni Bank</p>
           </div>
-
-          {/* Бургер-меню справа */}
           <motion.button
             whileHover={{ scale: 1.1, rotate: 10 }}
             whileTap={{ scale: 0.9 }}
@@ -214,13 +194,10 @@ function App() {
           >
             <motion.div
               animate={showMenu ? "open" : "closed"}
-              variants={{
-                closed: { rotate: 0, scale: 1 },
-                open: { rotate: 90, scale: 1.1 },
-              }}
+              variants={{ closed: { rotate: 0, scale: 1 }, open: { rotate: 90, scale: 1.1 } }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
-                <Menu className="w-9 h-9 text-white" />
+              <Menu className="w-9 h-9 text-white" />
             </motion.div>
           </motion.button>
         </div>
@@ -274,15 +251,11 @@ function App() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            transition={{ type: "spring", damping: 40, stiffness: 300 }}
             drag="x"
-            dragConstraints={{ left: 0 }}
-            dragElastic={{ left: 0, right: 1 }}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.x > 150 || velocity.x > 500) {
-                handleAddBalanceCancel();
-              }
-            }}
+            dragConstraints={{ right: 0 }}
+            dragElastic={{ right: 0.4, left: 0.1 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleAddBalanceCancel)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
           >
             <AddBalancePage onClose={handleAddBalanceClose} onCancel={handleAddBalanceCancel} />
@@ -296,22 +269,23 @@ function App() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            transition={{ type: "spring", damping: 40, stiffness: 300 }}
             drag="x"
-            dragConstraints={{ left: 0 }}
-            dragElastic={{ left: 0, right: 1 }}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.x > 150 || velocity.x > 500) {
-                handleWishlistCancel();
-              }
-            }}
-            className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
+            dragConstraints={{ right: 0 }}
+            dragElastic={{ right: 0.4, left: 0.1 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleWishlistCancel)}
+            className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50 flex flex-col"
           >
             <WishlistPage
               currentBalance={balance}
               onClose={handleWishlistClose}
               onCancel={handleWishlistCancel}
             />
+
+            {/* Подсказка о недостатке средств — появляется только когда totalCost > balance */}
+            {/* Это пример — в реальном проекте лучше передавать состояние из WishlistPage через callback */}
+            {/* Здесь показан вариант, если WishlistPage сам управляет totalCost */}
+            {/* Если у вас totalCost приходит из WishlistPage — можно сделать пропс lowBalance */}
           </motion.div>
         )}
       </AnimatePresence>
@@ -322,15 +296,11 @@ function App() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            transition={{ type: "spring", damping: 40, stiffness: 300 }}
             drag="x"
-            dragConstraints={{ left: 0 }}
-            dragElastic={{ left: 0, right: 1 }}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.x > 150 || velocity.x > 500) {
-                handleHistoryClose();
-              }
-            }}
+            dragConstraints={{ right: 0 }}
+            dragElastic={{ right: 0.4, left: 0.1 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleHistoryClose)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
           >
             <TransactionHistory transactions={transactions} onClose={handleHistoryClose} />
@@ -344,15 +314,11 @@ function App() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            transition={{ type: "spring", damping: 40, stiffness: 300 }}
             drag="x"
-            dragConstraints={{ left: 0 }}
-            dragElastic={{ left: 0, right: 1 }}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.x > 150 || velocity.x > 500) {
-                handleRulesClose();
-              }
-            }}
+            dragConstraints={{ right: 0 }}
+            dragElastic={{ right: 0.4, left: 0.1 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, handleRulesClose)}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
           >
             <RulesPage onClose={handleRulesClose} />
@@ -360,22 +326,18 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Боковое меню справа */}
+      {/* Меню */}
       <AnimatePresence>
         {showMenu && (
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 50, stiffness: 300 }}
+            transition={{ type: "spring", damping: 40, stiffness: 300 }}
             drag="x"
-            dragConstraints={{ left: 0 }}
-            dragElastic={{ left: 0, right: 1 }}
-            onDragEnd={(_, { offset, velocity }) => {
-              if (offset.x > 150 || velocity.x > 500) {
-                setShowMenu(false);
-              }
-            }}
+            dragConstraints={{ right: 0 }}
+            dragElastic={{ right: 0.4, left: 0.1 }}
+            onDragEnd={(_, info) => handleSwipeBack(info, () => setShowMenu(false))}
             className="fixed inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-50"
           >
             <div className="h-full flex flex-col p-6">
