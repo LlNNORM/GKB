@@ -226,10 +226,10 @@ function App() {
         transition={{ delay: 1.5 }}
         className="absolute top-[72%] left-0 right-0 text-center z-0 px-4"
       >
-        <p className="text-white/60 text-lg font-medium drop-shadow-lg">
+        <p className="text-white/60 text-md font-medium drop-shadow-lg">
           ✨ Предъявите вашу киску 😼 для списания Kuni-Coins✨
         </p>
-        <p className="text-white/60 text-lg font-medium drop-shadow-lg mt-2">
+        <p className="text-white/60 text-md font-medium drop-shadow-lg mt-2">
           ✨ Предъявите ваши ножки 🐾 для начисления Kuni-Coins✨
         </p>
         {faceSwipeCount > 0 && (
