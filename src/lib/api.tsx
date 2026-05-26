@@ -33,7 +33,13 @@ export const signOut = async () => {
 };
 
 export const getCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    console.log("🔍 getCurrentUser: вызываю supabase.auth.getUser()");
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+        console.error("🔍 getCurrentUser: ошибка", error);
+        return null;
+    }
+    console.log("🔍 getCurrentUser: пользователь получен", user?.email);
     return user;
 };
 
